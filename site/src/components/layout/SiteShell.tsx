@@ -1,7 +1,6 @@
 import { motion, useReducedMotion } from 'motion/react'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { preloadSite, type PreloadProgress } from '../../lib/preload'
-import { isTouchDevice } from '../../lib/device'
 import { SiteLoader } from '../ui/SiteLoader'
 
 type SiteShellProps = {
@@ -15,27 +14,15 @@ const INITIAL_PROGRESS: PreloadProgress = {
   label: 'A preparar tipografia…',
 }
 
-const FORCE_READY_MS = isTouchDevice() ? 14_000 : 22_000
-
-function lockBodyScroll() {
-  const y = window.scrollY
-  document.body.dataset.scrollLock = String(y)
-  document.body.style.position = 'fixed'
-  document.body.style.top = `-${y}px`
-  document.body.style.left = '0'
-  document.body.style.right = '0'
-  document.body.style.width = '100%'
-}
-
-function unlockBodyScroll() {
-  const y = Number(document.body.dataset.scrollLock ?? '0')
+/** Garante que o scroll nunca fica bloqueado após o loader. */
+function restorePageScroll() {
+  document.body.style.overflow = ''
   document.body.style.position = ''
   document.body.style.top = ''
   document.body.style.left = ''
   document.body.style.right = ''
   document.body.style.width = ''
   delete document.body.dataset.scrollLock
-  window.scrollTo(0, y)
 }
 
 export function SiteShell({ children, includeVideo = true }: SiteShellProps) {
@@ -46,29 +33,28 @@ export function SiteShell({ children, includeVideo = true }: SiteShellProps) {
 
   useEffect(() => {
     let cancelled = false
+    let exitTimer: ReturnType<typeof setTimeout> | undefined
     revealedRef.current = false
 
-    const reveal = () => {
+    const finish = () => {
       if (cancelled || revealedRef.current) return
       revealedRef.current = true
+      restorePageScroll()
 
       if (reduced) {
         setPhase('ready')
-        unlockBodyScroll()
         return
       }
+
       setPhase('exiting')
-      window.setTimeout(() => {
-        if (!cancelled) {
-          setPhase('ready')
-          unlockBodyScroll()
-        }
+      exitTimer = window.setTimeout(() => {
+        if (!cancelled) setPhase('ready')
       }, 920)
     }
 
-    lockBodyScroll()
+    document.body.style.overflow = 'hidden'
 
-    const forceTimer = window.setTimeout(reveal, FORCE_READY_MS)
+    const forceTimer = window.setTimeout(finish, 12_000)
 
     preloadSite({
       includeVideo,
@@ -76,38 +62,32 @@ export function SiteShell({ children, includeVideo = true }: SiteShellProps) {
         if (!cancelled) setProgress(p)
       },
     })
-      .then(reveal)
-      .catch(reveal)
+      .then(finish)
+      .catch(finish)
 
     return () => {
       cancelled = true
       clearTimeout(forceTimer)
-      unlockBodyScroll()
+      if (exitTimer) clearTimeout(exitTimer)
+      restorePageScroll()
     }
   }, [includeVideo, reduced])
 
-  const showLoader = phase !== 'ready'
-
   return (
     <>
-      {showLoader && (
+      {phase !== 'ready' && (
         <SiteLoader progress={progress} exiting={phase === 'exiting'} />
       )}
-      <div
-        className="min-w-0 w-full"
-        {...(showLoader ? { inert: true as const, 'aria-hidden': true as const } : {})}
-      >
+      {phase === 'ready' && (
         <motion.div
-          initial={false}
-          animate={{
-            opacity: phase === 'ready' ? 1 : 0,
-            pointerEvents: phase === 'ready' ? 'auto' : 'none',
-          }}
+          className="min-w-0 w-full"
+          initial={reduced ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: reduced ? 0.2 : 0.5, ease: [0.22, 1, 0.36, 1] }}
         >
           {children}
         </motion.div>
-      </div>
+      )}
     </>
   )
 }

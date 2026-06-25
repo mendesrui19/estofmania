@@ -545,7 +545,7 @@ function VideoStage() {
       style={{ height: SCROLL_HEIGHT }}
     >
       <div
-        className="sticky top-0 viewport-lock overflow-hidden touch-pan-y"
+        className="sticky top-0 viewport-lock overflow-hidden"
         style={{ backgroundColor: VIDEO_STUDIO }}
       >
         <motion.div
