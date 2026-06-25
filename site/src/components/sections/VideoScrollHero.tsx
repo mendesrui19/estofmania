@@ -8,10 +8,9 @@ import {
 } from 'motion/react'
 import { type ReactNode, useRef } from 'react'
 import { company } from '../../data/content'
-import { HERO_VIDEO_SRC } from '../../lib/assets'
+import { getHeroVideoSrc } from '../../lib/preload'
 import { whatsappUrl } from '../../lib/utils'
 
-const VIDEO_SRC = HERO_VIDEO_SRC
 /** Matches the studio cyclorama in the source MP4 — do not colorkey (sofa is same grey). */
 const VIDEO_STUDIO = '#A8A8A8'
 const SCROLL_HEIGHT = '1400vh'
@@ -470,6 +469,7 @@ function GhostPill({
 }
 
 function VideoStage() {
+  const videoSrc = getHeroVideoSrc()
   const containerRef = useRef<HTMLElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
   const { scrollYProgress } = useScroll({
@@ -513,7 +513,7 @@ function VideoStage() {
         >
           <video
             ref={videoRef}
-            src={VIDEO_SRC}
+            src={videoSrc}
             muted
             playsInline
             preload="auto"
@@ -579,6 +579,8 @@ function VideoStage() {
 }
 
 function StaticHero() {
+  const videoSrc = getHeroVideoSrc()
+
   return (
     <section
       id="inicio"
@@ -586,7 +588,7 @@ function StaticHero() {
       style={{ backgroundColor: VIDEO_STUDIO }}
     >
       <video
-        src={VIDEO_SRC}
+        src={videoSrc}
         muted
         playsInline
         preload="metadata"

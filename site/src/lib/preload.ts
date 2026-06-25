@@ -15,7 +15,20 @@ const PHASE_LABELS: Record<PreloadPhase, string> = {
   final: 'Quase pronto…',
 }
 
-const MAX_WAIT_MS = 45_000
+const MAX_WAIT_MS = 90_000
+
+/** Blob URL do vídeo hero — partilhado entre loader e scroll hero. */
+let heroVideoBlobUrl: string | null = null
+let heroVideoReady = false
+
+/** URL pronta para o `<video>` do hero (blob após preload, senão fallback de rede). */
+export function getHeroVideoSrc(): string {
+  return heroVideoBlobUrl ?? HERO_VIDEO_SRC
+}
+
+export function isHeroVideoReady(): boolean {
+  return heroVideoReady
+}
 
 function preloadImage(src: string): Promise<void> {
   return new Promise((resolve) => {
@@ -28,7 +41,51 @@ function preloadImage(src: string): Promise<void> {
   })
 }
 
-function preloadVideo(src: string): Promise<void> {
+async function fetchHeroVideoBlob(
+  src: string,
+  onProgress?: (ratio: number) => void,
+): Promise<string> {
+  if (heroVideoBlobUrl) {
+    onProgress?.(1)
+    return heroVideoBlobUrl
+  }
+
+  const response = await fetch(src)
+  if (!response.ok) throw new Error(`hero video fetch ${response.status}`)
+
+  const contentLength = Number(response.headers.get('content-length')) || 0
+  const body = response.body
+
+  let blob: Blob
+
+  if (!body || contentLength <= 0) {
+    blob = await response.blob()
+    onProgress?.(1)
+  } else {
+    const reader = body.getReader()
+    const chunks: Uint8Array[] = []
+    let received = 0
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      chunks.push(value)
+      received += value.length
+      onProgress?.(Math.min(received / contentLength, 0.98))
+    }
+
+    blob = new Blob(chunks as BlobPart[], { type: response.headers.get('content-type') ?? 'video/mp4' })
+    onProgress?.(1)
+  }
+
+  heroVideoBlobUrl = URL.createObjectURL(blob)
+  return heroVideoBlobUrl
+}
+
+/**
+ * Garante que o vídeo está descarregado e buffered até ao fim — essencial para scrub no scroll.
+ */
+function warmHeroVideo(blobUrl: string): Promise<void> {
   return new Promise((resolve) => {
     const video = document.createElement('video')
     video.preload = 'auto'
@@ -39,20 +96,43 @@ function preloadVideo(src: string): Promise<void> {
     const finish = () => {
       if (settled) return
       settled = true
-      video.src = ''
-      video.load()
+      heroVideoReady = true
       resolve()
     }
 
+    const checkBuffered = () => {
+      const duration = video.duration
+      if (!duration || Number.isNaN(duration)) return
+      if (video.buffered.length === 0) return
+      const end = video.buffered.end(video.buffered.length - 1)
+      if (end >= duration - 0.15) finish()
+    }
+
+    video.addEventListener('loadedmetadata', checkBuffered, { once: true })
+    video.addEventListener('progress', checkBuffered)
     video.addEventListener('canplaythrough', finish, { once: true })
-    video.addEventListener('loadeddata', () => {
-      if (video.readyState >= 3) finish()
-    })
     video.addEventListener('error', finish, { once: true })
 
-    video.src = src
+    video.src = blobUrl
     video.load()
   })
+}
+
+async function preloadHeroVideo(
+  src: string,
+  onProgress?: (ratio: number) => void,
+): Promise<void> {
+  if (heroVideoReady && heroVideoBlobUrl) {
+    onProgress?.(1)
+    return
+  }
+
+  const blobUrl = await fetchHeroVideoBlob(src, (fetchRatio) => {
+    onProgress?.(fetchRatio * 0.85)
+  })
+
+  await warmHeroVideo(blobUrl)
+  onProgress?.(1)
 }
 
 function waitForWindowLoad(): Promise<void> {
@@ -77,7 +157,7 @@ export type PreloadOptions = {
 }
 
 /**
- * Garante fonts, vídeo hero, imagens críticas e window.load antes de revelar o site.
+ * Garante fonts, vídeo hero (100%), imagens críticas e window.load antes de revelar o site.
  */
 let cachedPreload: Promise<void> | null = null
 let cachedKey = ''
@@ -136,9 +216,13 @@ async function preloadSiteInternal({
   if (includeVideo) {
     onProgress?.({ ratio: weights.fonts, phase: 'video', label: PHASE_LABELS.video })
     try {
-      await withTimeout(preloadVideo(HERO_VIDEO_SRC), MAX_WAIT_MS)
+      await withTimeout(
+        preloadHeroVideo(HERO_VIDEO_SRC, (local) => report('video', local)),
+        MAX_WAIT_MS,
+      )
     } catch {
-      /* timeout — revela o site na mesma após final */
+      /* timeout — revela o site na mesma; hero usa URL de rede */
+      heroVideoReady = false
     }
     report('video', 1)
   }
