@@ -20,6 +20,8 @@ const MAX_WAIT_MS = 90_000
 /** Blob URL do vídeo hero — partilhado entre loader e scroll hero. */
 let heroVideoBlobUrl: string | null = null
 let heroVideoReady = false
+/** Elemento já aquecido no loader — reutilizado no hero (crítico no iOS). */
+let heroVideoElement: HTMLVideoElement | null = null
 
 /** URL pronta para o `<video>` do hero (blob após preload, senão fallback de rede). */
 export function getHeroVideoSrc(): string {
@@ -28,6 +30,18 @@ export function getHeroVideoSrc(): string {
 
 export function isHeroVideoReady(): boolean {
   return heroVideoReady
+}
+
+/** Transfere o `<video>` pré-carregado para o hero (uma única vez). */
+export function adoptHeroVideoElement(): HTMLVideoElement | null {
+  const el = heroVideoElement
+  heroVideoElement = null
+  return el
+}
+
+/** Devolve o elemento ao pool (ex.: remount React StrictMode). */
+export function releaseHeroVideoElement(video: HTMLVideoElement): void {
+  if (!heroVideoElement) heroVideoElement = video
 }
 
 function preloadImage(src: string): Promise<void> {
@@ -91,13 +105,27 @@ function warmHeroVideo(blobUrl: string): Promise<void> {
     video.preload = 'auto'
     video.muted = true
     video.playsInline = true
+    video.setAttribute('playsinline', '')
+    video.setAttribute('webkit-playsinline', 'true')
 
     let settled = false
     const finish = () => {
       if (settled) return
       settled = true
       heroVideoReady = true
+      heroVideoElement = video
       resolve()
+    }
+
+    const finishAfterPrime = async () => {
+      try {
+        await video.play()
+        video.pause()
+        video.currentTime = 0
+      } catch {
+        /* iOS pode exigir toque — hero faz unlock depois */
+      }
+      finish()
     }
 
     const checkBuffered = () => {
@@ -105,12 +133,12 @@ function warmHeroVideo(blobUrl: string): Promise<void> {
       if (!duration || Number.isNaN(duration)) return
       if (video.buffered.length === 0) return
       const end = video.buffered.end(video.buffered.length - 1)
-      if (end >= duration - 0.15) finish()
+      if (end >= duration - 0.15) void finishAfterPrime()
     }
 
     video.addEventListener('loadedmetadata', checkBuffered, { once: true })
     video.addEventListener('progress', checkBuffered)
-    video.addEventListener('canplaythrough', finish, { once: true })
+    video.addEventListener('canplaythrough', () => void finishAfterPrime(), { once: true })
     video.addEventListener('error', finish, { once: true })
 
     video.src = blobUrl

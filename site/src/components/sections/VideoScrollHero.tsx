@@ -6,9 +6,14 @@ import {
   useTransform,
   type MotionValue,
 } from 'motion/react'
-import { type ReactNode, useRef } from 'react'
+import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { company } from '../../data/content'
-import { getHeroVideoSrc } from '../../lib/preload'
+import {
+  isTouchDevice,
+  primeVideoForScroll,
+  seekVideoToProgress,
+} from '../../lib/heroVideo'
+import { adoptHeroVideoElement, getHeroVideoSrc, releaseHeroVideoElement } from '../../lib/preload'
 import { whatsappUrl } from '../../lib/utils'
 
 /** Matches the studio cyclorama in the source MP4 — do not colorkey (sofa is same grey). */
@@ -471,7 +476,10 @@ function GhostPill({
 function VideoStage() {
   const videoSrc = getHeroVideoSrc()
   const containerRef = useRef<HTMLElement>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
+  const videoHostRef = useRef<HTMLDivElement>(null)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
+  const primedRef = useRef(false)
+  const [touchDevice] = useState(isTouchDevice)
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end end'],
@@ -487,13 +495,61 @@ function VideoStage() {
   const ctaOpacity = useTransform(beatProgress, [0, 0.78, 0.94], [1, 1, 0])
   const textVeil = useTransform(progress, [0, 0.25, 0.55], [0.72, 0.55, 0.65])
 
+  useEffect(() => {
+    const host = videoHostRef.current
+    if (!host) return
+
+    const adopted = adoptHeroVideoElement()
+    const video = adopted ?? document.createElement('video')
+    const created = !adopted
+
+    if (created) {
+      video.src = videoSrc
+      video.preload = 'auto'
+    }
+
+    video.muted = true
+    video.defaultMuted = true
+    video.playsInline = true
+    video.setAttribute('playsinline', '')
+    video.setAttribute('webkit-playsinline', 'true')
+    video.className =
+      'hero-video-el h-full w-full object-cover object-[center_42%] [transform:translateZ(0)]'
+
+    host.appendChild(video)
+    videoRef.current = video
+
+    const unlock = async () => {
+      if (primedRef.current) return
+      await primeVideoForScroll(video)
+      primedRef.current = true
+      seekVideoToProgress(video, scrollYProgress.get())
+    }
+
+    void unlock()
+
+    const onTouch = () => {
+      void unlock()
+    }
+    window.addEventListener('touchstart', onTouch, { once: true, passive: true })
+
+    return () => {
+      window.removeEventListener('touchstart', onTouch)
+      videoRef.current = null
+      if (host.contains(video)) host.removeChild(video)
+      if (created) {
+        video.removeAttribute('src')
+        video.load()
+      } else {
+        releaseHeroVideoElement(video)
+      }
+    }
+  }, [scrollYProgress, videoSrc])
+
   useMotionValueEvent(scrollYProgress, 'change', (p) => {
     const video = videoRef.current
-    if (!video?.duration || Number.isNaN(video.duration)) return
-    const target = p * video.duration
-    if (Math.abs(video.currentTime - target) > 0.035) {
-      video.currentTime = target
-    }
+    if (!video) return
+    seekVideoToProgress(video, p)
   })
 
   return (
@@ -504,21 +560,14 @@ function VideoStage() {
       style={{ height: SCROLL_HEIGHT }}
     >
       <div
-        className="sticky top-0 h-[100svh] overflow-hidden"
+        className="hero-video-stage sticky top-0 h-[100svh] overflow-hidden"
         style={{ backgroundColor: VIDEO_STUDIO }}
       >
         <motion.div
-          className="absolute inset-0 z-[1]"
-          style={{ scale: videoScale, y: videoY }}
+          className="hero-video-layer absolute inset-0 z-[1]"
+          style={touchDevice ? undefined : { scale: videoScale, y: videoY }}
         >
-          <video
-            ref={videoRef}
-            src={videoSrc}
-            muted
-            playsInline
-            preload="auto"
-            className="h-full w-full object-cover object-[center_42%]"
-          />
+          <div ref={videoHostRef} className="h-full w-full" aria-hidden />
         </motion.div>
 
         {/* Flash pós-loader — reveal cinematográfico */}
@@ -580,6 +629,13 @@ function VideoStage() {
 
 function StaticHero() {
   const videoSrc = getHeroVideoSrc()
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+    void primeVideoForScroll(video)
+  }, [])
 
   return (
     <section
@@ -588,13 +644,14 @@ function StaticHero() {
       style={{ backgroundColor: VIDEO_STUDIO }}
     >
       <video
+        ref={videoRef}
         src={videoSrc}
         muted
         playsInline
-        preload="metadata"
+        preload="auto"
         autoPlay
         loop
-        className="aspect-video w-full object-cover object-[center_42%]"
+        className="hero-video-el aspect-video w-full object-cover object-[center_42%]"
       />
       <div className="section-pad py-12">
         <p className="text-kicker-cream">Limpeza profissional de estofos</p>

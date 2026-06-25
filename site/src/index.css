@@ -79,6 +79,22 @@
     padding-inline: clamp(1.25rem, 5vw, 3.5rem);
   }
 
+  /* iOS/Safari — vídeo dentro de sticky/transform precisa de layer próprio */
+  .hero-video-stage {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+
+  .hero-video-layer {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+
+  .hero-video-el {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
   .hero-beat-left {
     grid-column: span 12 / span 12;
     margin-inline: auto;
