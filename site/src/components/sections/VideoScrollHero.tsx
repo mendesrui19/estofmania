@@ -348,14 +348,14 @@ function OpeningHeadline({ progress }: { progress: MotionValue<number> }) {
           Limpeza profissional de estofos
         </motion.p>
 
-        <h1 className="hero-text-glow-strong mx-auto mt-7 max-w-[16ch] md:mx-0">
+        <h1 className="hero-text-glow-strong mx-auto mt-7 max-w-[22ch] md:mx-0">
           <motion.span
             className="text-hero-cinema block text-warm-cream"
             initial={{ opacity: 0, y: 48, filter: 'blur(8px)' }}
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             transition={{ duration: 0.95, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}
           >
-            Estofos
+            Limpamos
           </motion.span>
           <motion.span
             className="text-hero-cinema-accent hero-accent-brand mt-1 block"
@@ -363,15 +363,7 @@ function OpeningHeadline({ progress }: { progress: MotionValue<number> }) {
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             transition={{ duration: 0.95, delay: 0.42, ease: [0.22, 1, 0.36, 1] }}
           >
-            limpos como
-          </motion.span>
-          <motion.span
-            className="text-hero-cinema block text-warm-cream"
-            initial={{ opacity: 0, y: 48, filter: 'blur(8px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            transition={{ duration: 0.95, delay: 0.56, ease: [0.22, 1, 0.36, 1] }}
-          >
-            novos.
+            os seus estofos.
           </motion.span>
         </h1>
 
@@ -658,9 +650,8 @@ function StaticHero() {
       <div className="section-pad py-12">
         <p className="text-kicker-cream">Limpeza profissional de estofos</p>
         <h1 className="mt-6">
-          <span className="text-hero-cinema block text-warm-cream">Estofos</span>
-          <span className="text-hero-cinema-accent hero-accent-brand mt-1 block">limpos como</span>
-          <span className="text-hero-cinema block text-warm-cream">novos.</span>
+          <span className="text-hero-cinema block text-warm-cream">Limpamos</span>
+          <span className="text-hero-cinema-accent hero-accent-brand mt-1 block">os seus estofos.</span>
         </h1>
         <p className="text-hero-lede mt-6 max-w-lg">{company.description}</p>
         <GhostPill href={whatsappUrl('Olá Estofmania! Quero orçamento grátis.')} accent>
