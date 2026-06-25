@@ -52,7 +52,7 @@ export function CurtainReveal({ image, label, title, caption }: CurtainRevealPro
 
   return (
     <section ref={ref} className="relative h-[220vh] bg-canvas">
-      <div className="sticky top-0 viewport-lock overflow-hidden">
+      <div className="sticky top-0 h-screen overflow-hidden">
         {/* Revealed stage */}
         <motion.img
           src={image}

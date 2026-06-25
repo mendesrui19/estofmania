@@ -1,5 +1,4 @@
 import { HERO_VIDEO_SRC, CRITICAL_IMAGES } from './assets'
-import { isTouchDevice } from './device'
 
 export type PreloadPhase = 'fonts' | 'video' | 'images' | 'final'
 
@@ -16,10 +15,7 @@ const PHASE_LABELS: Record<PreloadPhase, string> = {
   final: 'Quase pronto…',
 }
 
-const DESKTOP_MAX_WAIT_MS = 45_000
-const MOBILE_MAX_WAIT_MS = 5_000
-const MOBILE_LOAD_EVENT_MS = 2_500
-const DESKTOP_LOAD_EVENT_MS = 15_000
+const MAX_WAIT_MS = 45_000
 
 function preloadImage(src: string): Promise<void> {
   return new Promise((resolve) => {
@@ -65,17 +61,10 @@ function preloadVideo(src: string): Promise<void> {
   })
 }
 
-function waitForWindowLoad(timeoutMs: number): Promise<void> {
+function waitForWindowLoad(): Promise<void> {
   if (document.readyState === 'complete') return Promise.resolve()
   return new Promise((resolve) => {
-    let done = false
-    const finish = () => {
-      if (done) return
-      done = true
-      resolve()
-    }
-    window.addEventListener('load', finish, { once: true })
-    setTimeout(finish, timeoutMs)
+    window.addEventListener('load', () => resolve(), { once: true })
   })
 }
 
@@ -94,34 +83,29 @@ export type PreloadOptions = {
 }
 
 /**
- * Garante fonts, vídeo hero (desktop), imagens críticas antes de revelar o site.
- * Em telemóvel: preload curto — o vídeo do hero carrega in-place.
+ * Garante fonts, vídeo hero, imagens críticas e window.load antes de revelar o site.
  */
 let cachedPreload: Promise<void> | null = null
 let cachedKey = ''
 
 export async function preloadSite(options: PreloadOptions = {}): Promise<void> {
-  const touch = isTouchDevice()
-  const key = `${options.includeVideo !== false}-${touch}`
+  const key = `${options.includeVideo !== false}`
   if (cachedPreload && cachedKey === key) return cachedPreload
   cachedKey = key
-  cachedPreload = preloadSiteInternal(options, touch)
+  cachedPreload = preloadSiteInternal(options)
   return cachedPreload
 }
 
-async function preloadSiteInternal(
-  { includeVideo = true, onProgress }: PreloadOptions = {},
-  touch: boolean,
-): Promise<void> {
+async function preloadSiteInternal({
+  includeVideo = true,
+  onProgress,
+}: PreloadOptions = {}): Promise<void> {
   const images = [...CRITICAL_IMAGES]
-  const skipVideoPreload = touch
-  const preloadVideoHero = includeVideo && !skipVideoPreload
-  const maxWait = touch ? MOBILE_MAX_WAIT_MS : DESKTOP_MAX_WAIT_MS
-
-  const weights = preloadVideoHero
+  const weights = includeVideo
     ? { fonts: 0.08, video: 0.42, images: 0.42, final: 0.08 }
-    : { fonts: 0.12, video: 0, images: 0.8, final: 0.08 }
+    : { fonts: 0.15, video: 0, images: 0.77, final: 0.08 }
 
+  let done = 0
   const report = (phase: PreloadPhase, localRatio: number) => {
     const phaseStart =
       phase === 'fonts'
@@ -143,27 +127,25 @@ async function preloadSiteInternal(
 
     const ratio = Math.min(phaseStart + localRatio * phaseWeight, 0.995)
     onProgress?.({ ratio, phase, label: PHASE_LABELS[phase] })
+    return ratio
   }
 
   onProgress?.({ ratio: 0, phase: 'fonts', label: PHASE_LABELS.fonts })
 
   try {
-    await withTimeout(document.fonts.ready, touch ? 4_000 : DESKTOP_MAX_WAIT_MS)
+    await withTimeout(document.fonts.ready, MAX_WAIT_MS)
   } catch {
-    /* continua */
+    /* continua — fonts podem falhar em browsers antigos */
   }
   report('fonts', 1)
 
-  if (preloadVideoHero) {
+  if (includeVideo) {
     onProgress?.({ ratio: weights.fonts, phase: 'video', label: PHASE_LABELS.video })
     try {
-      await withTimeout(preloadVideo(HERO_VIDEO_SRC), maxWait)
+      await withTimeout(preloadVideo(HERO_VIDEO_SRC), MAX_WAIT_MS)
     } catch {
-      /* timeout — hero carrega in-place */
+      /* timeout — revela o site na mesma após final */
     }
-    report('video', 1)
-  } else if (includeVideo && touch) {
-    onProgress?.({ ratio: weights.fonts, phase: 'video', label: 'A preparar vídeo…' })
     report('video', 1)
   }
 
@@ -173,15 +155,11 @@ async function preloadSiteInternal(
     label: PHASE_LABELS.images,
   })
 
-  if (touch) {
-    await Promise.all(images.map((src) => preloadImage(src)))
-    report('images', 1)
-  } else {
-    const imageStep = 1 / Math.max(images.length, 1)
-    for (let i = 0; i < images.length; i++) {
-      await preloadImage(images[i]!)
-      report('images', (i + 1) * imageStep)
-    }
+  const imageStep = 1 / Math.max(images.length, 1)
+  for (let i = 0; i < images.length; i++) {
+    await preloadImage(images[i]!)
+    done = i + 1
+    report('images', done * imageStep)
   }
 
   onProgress?.({
@@ -190,8 +168,8 @@ async function preloadSiteInternal(
     label: PHASE_LABELS.final,
   })
 
-  await waitForWindowLoad(touch ? MOBILE_LOAD_EVENT_MS : DESKTOP_LOAD_EVENT_MS)
-  await new Promise((r) => setTimeout(r, touch ? 120 : 280))
+  await waitForWindowLoad()
+  await new Promise((r) => setTimeout(r, 280))
 
   onProgress?.({ ratio: 1, phase: 'final', label: 'Pronto.' })
 }

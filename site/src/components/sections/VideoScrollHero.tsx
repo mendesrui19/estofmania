@@ -6,9 +6,8 @@ import {
   useTransform,
   type MotionValue,
 } from 'motion/react'
-import { type ReactNode, type VideoHTMLAttributes, useEffect, useRef } from 'react'
+import { type ReactNode, type VideoHTMLAttributes, useRef } from 'react'
 import { company } from '../../data/content'
-import { isTouchDevice } from '../../lib/device'
 import { HERO_VIDEO_SRC } from '../../lib/assets'
 import { whatsappUrl } from '../../lib/utils'
 
@@ -331,15 +330,14 @@ function OpeningHeadline({ progress }: { progress: MotionValue<number> }) {
         <div className="hero-beat-left">
         <motion.p
           className="text-kicker-cream flex items-center justify-center gap-3 md:justify-start"
-          initial={false}
+          initial={{ opacity: 0, x: -24 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.75, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
         >
           <motion.span
             className="block h-px origin-left bg-gradient-to-r from-burnt-sienna to-burnt-sienna/30"
-            initial={false}
+            initial={{ scaleX: 0, width: 48 }}
             animate={{ scaleX: 1 }}
-            style={{ width: 48 }}
             transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
             aria-hidden
           />
@@ -349,7 +347,7 @@ function OpeningHeadline({ progress }: { progress: MotionValue<number> }) {
         <h1 className="hero-text-glow-strong mx-auto mt-7 max-w-[16ch] md:mx-0">
           <motion.span
             className="text-hero-cinema block text-warm-cream"
-            initial={false}
+            initial={{ opacity: 0, y: 48, filter: 'blur(8px)' }}
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             transition={{ duration: 0.95, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}
           >
@@ -357,7 +355,7 @@ function OpeningHeadline({ progress }: { progress: MotionValue<number> }) {
           </motion.span>
           <motion.span
             className="text-hero-cinema-accent hero-accent-brand mt-1 block"
-            initial={false}
+            initial={{ opacity: 0, y: 36, filter: 'blur(6px)' }}
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             transition={{ duration: 0.95, delay: 0.42, ease: [0.22, 1, 0.36, 1] }}
           >
@@ -365,7 +363,7 @@ function OpeningHeadline({ progress }: { progress: MotionValue<number> }) {
           </motion.span>
           <motion.span
             className="text-hero-cinema block text-warm-cream"
-            initial={false}
+            initial={{ opacity: 0, y: 48, filter: 'blur(8px)' }}
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             transition={{ duration: 0.95, delay: 0.56, ease: [0.22, 1, 0.36, 1] }}
           >
@@ -375,7 +373,7 @@ function OpeningHeadline({ progress }: { progress: MotionValue<number> }) {
 
         <motion.p
           className="hero-text-glow text-hero-lede mt-6 max-w-lg md:mt-8"
-          initial={false}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.72, ease: [0.22, 1, 0.36, 1] }}
         >
@@ -385,7 +383,7 @@ function OpeningHeadline({ progress }: { progress: MotionValue<number> }) {
 
         <motion.p
           className="hero-text-glow mt-3 font-display text-[13px] font-semibold tracking-wide text-burnt-sienna"
-          initial={false}
+          initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.88 }}
         >
@@ -475,7 +473,6 @@ function GhostPill({
 function VideoStage() {
   const containerRef = useRef<HTMLElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
-  const videoReadyRef = useRef(false)
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end end'],
@@ -491,50 +488,12 @@ function VideoStage() {
   const ctaOpacity = useTransform(beatProgress, [0, 0.78, 0.94], [1, 1, 0])
   const textVeil = useTransform(progress, [0, 0.25, 0.55], [0.72, 0.55, 0.65])
 
-  useEffect(() => {
-    const video = videoRef.current
-    if (!video) return
-
-    let cancelled = false
-
-    const primeVideo = async () => {
-      if (cancelled || videoReadyRef.current) return
-      try {
-        video.muted = true
-        await video.play()
-        video.pause()
-        video.currentTime = 0.001
-      } catch {
-        /* iOS low power / autoplay policy — seek ainda pode funcionar após metadata */
-      }
-      if (!cancelled) videoReadyRef.current = true
-    }
-
-    const onMeta = () => void primeVideo()
-    video.addEventListener('loadedmetadata', onMeta)
-    video.addEventListener('canplay', onMeta)
-    if (video.readyState >= 1) void primeVideo()
-
-    return () => {
-      cancelled = true
-      video.removeEventListener('loadedmetadata', onMeta)
-      video.removeEventListener('canplay', onMeta)
-    }
-  }, [])
-
   useMotionValueEvent(scrollYProgress, 'change', (p) => {
     const video = videoRef.current
     if (!video?.duration || Number.isNaN(video.duration)) return
     const target = p * video.duration
-    if (Math.abs(video.currentTime - target) <= 0.05) return
-    try {
-      if (typeof video.fastSeek === 'function') {
-        video.fastSeek(target)
-      } else {
-        video.currentTime = target
-      }
-    } catch {
-      /* iOS pode rejeitar seek enquanto bufferiza */
+    if (Math.abs(video.currentTime - target) > 0.035) {
+      video.currentTime = target
     }
   })
 
@@ -546,7 +505,7 @@ function VideoStage() {
       style={{ height: SCROLL_HEIGHT }}
     >
       <div
-        className="sticky top-0 viewport-lock overflow-hidden"
+        className="sticky top-0 h-screen overflow-hidden"
         style={{ backgroundColor: VIDEO_STUDIO }}
       >
         <motion.div
@@ -564,7 +523,14 @@ function VideoStage() {
           />
         </motion.div>
 
-        {/* Flash pós-loader — removido: bloqueava ecrã em telemóvel se Motion falhar */}
+        {/* Flash pós-loader — reveal cinematográfico */}
+        <motion.div
+          className="pointer-events-none absolute inset-0 z-[4] bg-studio-black"
+          initial={{ opacity: 1 }}
+          animate={{ opacity: 0 }}
+          transition={{ duration: 1.1, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
+          aria-hidden
+        />
 
         <motion.div
           className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-r from-studio-black/95 via-studio-black/55 to-studio-black/15"
@@ -614,54 +580,6 @@ function VideoStage() {
   )
 }
 
-function MobileHero() {
-  return (
-    <section
-      id="inicio"
-      className="relative min-h-[100vh] min-h-[100svh] overflow-hidden bg-studio-black"
-    >
-      <div className="absolute inset-0">
-        <video
-          src={VIDEO_SRC}
-          muted
-          playsInline
-          autoPlay
-          loop
-          preload="auto"
-          {...LEGACY_VIDEO_ATTRS}
-          className="h-full w-full object-cover object-[center_42%]"
-        />
-        <div
-          className="absolute inset-0 bg-gradient-to-t from-studio-black via-studio-black/55 to-studio-black/25"
-          aria-hidden
-        />
-      </div>
-
-      <div className="relative z-10 flex min-h-[100vh] min-h-[100svh] flex-col justify-end section-pad pb-10 pt-[5.5rem]">
-        <p className="text-kicker-cream">Limpeza profissional de estofos</p>
-        <h1 className="hero-text-glow-strong mt-6">
-          <span className="text-hero-cinema block text-warm-cream">Estofos</span>
-          <span className="text-hero-cinema-accent hero-accent-brand mt-1 block">limpos como</span>
-          <span className="text-hero-cinema block text-warm-cream">novos.</span>
-        </h1>
-        <p className="hero-text-glow text-hero-lede mt-5 max-w-lg">
-          Higienizamos e impermeabilizamos sofás, tapetes, colchões e cortinas — em
-          Famalicão e arredores.
-        </p>
-        <p className="hero-text-glow mt-3 font-display text-[13px] font-semibold tracking-wide text-burnt-sienna">
-          Orçamento grátis · Resposta em 24h
-        </p>
-        <div className="mt-6 flex flex-wrap gap-3">
-          <GhostPill href={whatsappUrl('Olá Estofmania! Quero orçamento grátis.')} accent>
-            Pedir orçamento
-          </GhostPill>
-          <GhostPill href="/#servicos">Ver serviços</GhostPill>
-        </div>
-      </div>
-    </section>
-  )
-}
-
 function StaticHero() {
   return (
     <section
@@ -698,6 +616,5 @@ function StaticHero() {
 export function VideoScrollHero() {
   const reduced = useReducedMotion()
   if (reduced) return <StaticHero />
-  if (isTouchDevice()) return <MobileHero />
   return <VideoStage />
 }

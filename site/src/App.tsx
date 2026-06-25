@@ -13,7 +13,7 @@ import { ScrollProgress } from './components/ui/ScrollProgress'
 
 export default function App() {
   return (
-    <div className="w-full max-w-[100vw]">
+    <div className="overflow-x-hidden">
       <ScrollProgress />
       <CursorGlow />
       <Header />

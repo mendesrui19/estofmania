@@ -50,7 +50,7 @@ export function RugReveal({ label, title, caption }: RugRevealProps) {
 
   return (
     <section ref={ref} className="relative h-[240vh] bg-canvas">
-      <div className="sticky top-0 viewport-lock overflow-hidden">
+      <div className="sticky top-0 h-screen overflow-hidden">
         {/* The rug, revealed top-to-bottom */}
         <motion.div
           className="absolute inset-0 bg-brand-light bg-contain bg-center bg-no-repeat"

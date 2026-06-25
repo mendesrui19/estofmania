@@ -1,5 +1,5 @@
-import { useReducedMotion } from 'motion/react'
-import { type ReactNode, useEffect, useRef, useState } from 'react'
+import { motion, useReducedMotion } from 'motion/react'
+import { type ReactNode, useEffect, useState } from 'react'
 import { preloadSite, type PreloadProgress } from '../../lib/preload'
 import { SiteLoader } from '../ui/SiteLoader'
 
@@ -18,53 +18,57 @@ export function SiteShell({ children, includeVideo = true }: SiteShellProps) {
   const reduced = useReducedMotion()
   const [progress, setProgress] = useState<PreloadProgress>(INITIAL_PROGRESS)
   const [phase, setPhase] = useState<'loading' | 'exiting' | 'ready'>('loading')
-  const doneRef = useRef(false)
 
   useEffect(() => {
     let cancelled = false
-    let exitTimer: ReturnType<typeof setTimeout> | undefined
-    doneRef.current = false
 
-    const finish = () => {
-      if (cancelled || doneRef.current) return
-      doneRef.current = true
+    document.body.style.overflow = 'hidden'
 
-      if (reduced) {
-        setPhase('ready')
-        return
-      }
-
-      setPhase('exiting')
-      exitTimer = window.setTimeout(() => {
-        if (!cancelled) setPhase('ready')
-      }, 650)
-    }
-
-    const forceTimer = window.setTimeout(finish, 8_000)
-
-    preloadSite({
-      includeVideo,
-      onProgress: (p) => {
-        if (!cancelled) setProgress(p)
-      },
-    })
-      .then(finish)
-      .catch(finish)
+    preloadSite({ includeVideo, onProgress: (p) => {
+      if (!cancelled) setProgress(p)
+    } })
+      .then(() => {
+        if (cancelled) return
+        if (reduced) {
+          setPhase('ready')
+          document.body.style.overflow = ''
+          return
+        }
+        setPhase('exiting')
+        window.setTimeout(() => {
+          if (!cancelled) {
+            setPhase('ready')
+            document.body.style.overflow = ''
+          }
+        }, 920)
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setPhase('ready')
+          document.body.style.overflow = ''
+        }
+      })
 
     return () => {
       cancelled = true
-      clearTimeout(forceTimer)
-      if (exitTimer) clearTimeout(exitTimer)
+      document.body.style.overflow = ''
     }
   }, [includeVideo, reduced])
 
-  const showLoader = phase !== 'ready'
-
   return (
     <>
-      {children}
-      {showLoader && (
+      {phase !== 'ready' && (
         <SiteLoader progress={progress} exiting={phase === 'exiting'} />
+      )}
+      {phase === 'ready' && (
+        <motion.div
+          className="min-w-0 overflow-x-hidden"
+          initial={reduced ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {children}
+        </motion.div>
       )}
     </>
   )
