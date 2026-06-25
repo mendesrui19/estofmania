@@ -12,7 +12,7 @@ export function Hero() {
   const textOpacity = useTransform(scrollYProgress, [0, 0.75], [1, 0])
 
   return (
-    <section ref={ref} id="inicio" className="relative min-h-[92vh] overflow-hidden bg-brand-soft">
+    <section ref={ref} id="inicio" className="relative min-h-[92svh] overflow-hidden bg-brand-soft">
       <motion.div
         className="section-pad relative z-10 pt-24 md:pt-28"
         style={{ y: textY, opacity: textOpacity }}

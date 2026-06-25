@@ -387,7 +387,7 @@ function ServicesScrollStage() {
       style={{ height: SCROLL_HEIGHT }}
       aria-label="Serviços"
     >
-      <div className="sticky top-0 flex min-h-screen flex-col justify-center bg-canvas py-16 md:py-20">
+      <div className="sticky top-0 flex min-h-[100svh] flex-col justify-center bg-canvas py-16 md:py-20">
         <div className="section-pad mx-auto w-full max-w-6xl">
           <SectionLabel>Arquivo · Serviços</SectionLabel>
           <h2 className="text-heading">Tudo o que cuidamos.</h2>

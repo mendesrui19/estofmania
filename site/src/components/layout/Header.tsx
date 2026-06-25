@@ -10,19 +10,22 @@ type HeaderProps = {
 export function Header({ variant = 'hero' }: HeaderProps) {
   const { scrollY } = useScroll()
   const heroSolid = useTransform(scrollY, [0, 280], [0, 1])
-  const heroBg = useTransform(heroSolid, (v) => `rgba(16, 9, 4, ${0.45 + v * 0.55})`)
+  const heroBg = useTransform(heroSolid, (v) => `rgba(16, 9, 4, ${0.15 + v * 0.85})`)
+  const heroBlur = useTransform(heroSolid, [0, 1], [0, 14])
+  const heroBackdrop = useTransform(heroBlur, (b) => `blur(${b}px)`)
   const light = variant === 'light'
 
   return (
     <motion.header
-      className={`fixed inset-x-0 top-0 z-50 border-b ${
-        light ? 'border-border bg-canvas/95' : 'border-cork-shadow/60'
+      className={`fixed inset-x-0 top-0 z-50 border-b backdrop-blur-md ${
+        light ? 'border-border bg-canvas/90' : 'border-cork-shadow/60'
       }`}
       style={
         light
           ? undefined
           : {
               backgroundColor: heroBg,
+              backdropFilter: heroBackdrop,
             }
       }
     >

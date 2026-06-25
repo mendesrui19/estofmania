@@ -6,12 +6,11 @@ import {
   useTransform,
   type MotionValue,
 } from 'motion/react'
-import { type ReactNode, type VideoHTMLAttributes, useRef } from 'react'
+import { type ReactNode, useRef } from 'react'
 import { company } from '../../data/content'
 import { HERO_VIDEO_SRC } from '../../lib/assets'
 import { whatsappUrl } from '../../lib/utils'
 
-const LEGACY_VIDEO_ATTRS = { 'webkit-playsinline': '' } as VideoHTMLAttributes<HTMLVideoElement>
 const VIDEO_SRC = HERO_VIDEO_SRC
 /** Matches the studio cyclorama in the source MP4 — do not colorkey (sofa is same grey). */
 const VIDEO_STUDIO = '#A8A8A8'
@@ -505,7 +504,7 @@ function VideoStage() {
       style={{ height: SCROLL_HEIGHT }}
     >
       <div
-        className="sticky top-0 h-screen overflow-hidden"
+        className="sticky top-0 h-[100svh] overflow-hidden"
         style={{ backgroundColor: VIDEO_STUDIO }}
       >
         <motion.div
@@ -518,7 +517,6 @@ function VideoStage() {
             muted
             playsInline
             preload="auto"
-            {...LEGACY_VIDEO_ATTRS}
             className="h-full w-full object-cover object-[center_42%]"
           />
         </motion.div>
@@ -594,7 +592,6 @@ function StaticHero() {
         preload="metadata"
         autoPlay
         loop
-        {...LEGACY_VIDEO_ATTRS}
         className="aspect-video w-full object-cover object-[center_42%]"
       />
       <div className="section-pad py-12">

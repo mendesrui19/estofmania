@@ -36,7 +36,7 @@ export function RugReveal({ label, title, caption }: RugRevealProps) {
   if (reduced) {
     return (
       <section className="relative bg-canvas">
-        <div className="relative h-[70vh] overflow-hidden">
+        <div className="relative h-[70svh] overflow-hidden">
           <img src={RUG} alt={title} className="h-full w-full bg-brand-light object-contain p-4" />
           <div className="absolute inset-0 bg-gradient-to-t from-canvas/60 via-transparent to-transparent" />
           <div className="section-pad absolute bottom-0 left-0 pb-10">
@@ -50,7 +50,7 @@ export function RugReveal({ label, title, caption }: RugRevealProps) {
 
   return (
     <section ref={ref} className="relative h-[240vh] bg-canvas">
-      <div className="sticky top-0 h-screen overflow-hidden">
+      <div className="sticky top-0 h-[100svh] overflow-hidden">
         {/* The rug, revealed top-to-bottom */}
         <motion.div
           className="absolute inset-0 bg-brand-light bg-contain bg-center bg-no-repeat"

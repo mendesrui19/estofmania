@@ -34,8 +34,6 @@ function preloadVideo(src: string): Promise<void> {
     video.preload = 'auto'
     video.muted = true
     video.playsInline = true
-    video.setAttribute('playsinline', '')
-    video.setAttribute('webkit-playsinline', '')
 
     let settled = false
     const finish = () => {
@@ -46,14 +44,10 @@ function preloadVideo(src: string): Promise<void> {
       resolve()
     }
 
-    const onReady = () => {
-      if (video.readyState >= 2) finish()
-    }
-
     video.addEventListener('canplaythrough', finish, { once: true })
-    video.addEventListener('canplay', onReady)
-    video.addEventListener('loadeddata', onReady)
-    video.addEventListener('loadedmetadata', onReady)
+    video.addEventListener('loadeddata', () => {
+      if (video.readyState >= 3) finish()
+    })
     video.addEventListener('error', finish, { once: true })
 
     video.src = src

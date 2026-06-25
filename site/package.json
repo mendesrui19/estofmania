@@ -19,22 +19,12 @@
     "tailwind-merge": "^3.6.0",
     "tailwindcss": "^4.3.1"
   },
-  "browserslist": [
-    "chrome >= 64",
-    "firefox >= 67",
-    "safari >= 12",
-    "ios >= 12",
-    "edge >= 79",
-    "android >= 64"
-  ],
   "devDependencies": {
     "@types/node": "^24.13.2",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
-    "@vitejs/plugin-legacy": "^8.1.0",
     "@vitejs/plugin-react": "^6.0.2",
     "oxlint": "^1.69.0",
-    "terser": "^5.48.0",
     "typescript": "~6.0.2",
     "vite": "^8.1.0"
   }
