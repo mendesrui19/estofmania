@@ -66,25 +66,27 @@ export function Stats() {
 
 export function Benefits() {
   return (
-    <section className="section-gap-compact section-pad mx-auto max-w-6xl border-t border-border bg-brand-light">
-      <SectionIntro label="Porquê nós" title="Cuidado que se sente." />
+    <section className="section-gap-compact w-full border-t border-border bg-brand-light">
+      <div className="section-pad w-full">
+        <SectionIntro label="Porquê nós" title="Cuidado que se sente." />
 
-      <Stagger className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {benefits.map((b, i) => (
-          <StaggerItem key={b}>
-            <motion.div
-              className="group flex items-start gap-3 rounded-xl border border-border/80 bg-white/80 px-4 py-3.5 backdrop-blur-sm transition-[border-color,box-shadow] duration-300 hover:border-brand/50 hover:shadow-[0_12px_32px_-12px_rgba(128,152,112,0.25)]"
-              whileHover={{ y: -3 }}
-              transition={{ duration: 0.25 }}
-            >
-              <span className="text-caption shrink-0 font-bold uppercase text-brand transition-transform duration-300 group-hover:translate-x-0.5">
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <span className="text-sm leading-snug text-ink">{b}</span>
-            </motion.div>
-          </StaggerItem>
-        ))}
-      </Stagger>
+        <Stagger className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
+          {benefits.map((b, i) => (
+            <StaggerItem key={b}>
+              <motion.div
+                className="group flex h-full min-h-[4.5rem] items-start gap-3 rounded-xl border border-border/80 bg-white/80 px-4 py-3.5 backdrop-blur-sm transition-[border-color,box-shadow] duration-300 hover:border-brand/50 hover:shadow-[0_12px_32px_-12px_rgba(128,152,112,0.25)] lg:px-5 lg:py-4"
+                whileHover={{ y: -3 }}
+                transition={{ duration: 0.25 }}
+              >
+                <span className="text-caption shrink-0 font-bold uppercase text-brand transition-transform duration-300 group-hover:translate-x-0.5">
+                  {String(i + 1).padStart(2, '0')}
+                </span>
+                <span className="text-sm leading-snug text-ink lg:text-[0.9375rem]">{b}</span>
+              </motion.div>
+            </StaggerItem>
+          ))}
+        </Stagger>
+      </div>
     </section>
   )
 }
