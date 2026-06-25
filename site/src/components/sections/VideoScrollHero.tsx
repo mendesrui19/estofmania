@@ -16,7 +16,7 @@ const LEGACY_VIDEO_ATTRS = { 'webkit-playsinline': '' } as VideoHTMLAttributes<H
 const VIDEO_SRC = HERO_VIDEO_SRC
 /** Matches the studio cyclorama in the source MP4 — do not colorkey (sofa is same grey). */
 const VIDEO_STUDIO = '#A8A8A8'
-const SCROLL_HEIGHT = isTouchDevice() ? '920vh' : '1400vh'
+const SCROLL_HEIGHT = '1400vh'
 
 type Range = readonly [number, number]
 type BeatSide = 'left' | 'right'
@@ -331,14 +331,15 @@ function OpeningHeadline({ progress }: { progress: MotionValue<number> }) {
         <div className="hero-beat-left">
         <motion.p
           className="text-kicker-cream flex items-center justify-center gap-3 md:justify-start"
-          initial={{ opacity: 0, x: -24 }}
+          initial={false}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.75, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
         >
           <motion.span
             className="block h-px origin-left bg-gradient-to-r from-burnt-sienna to-burnt-sienna/30"
-            initial={{ scaleX: 0, width: 48 }}
+            initial={false}
             animate={{ scaleX: 1 }}
+            style={{ width: 48 }}
             transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
             aria-hidden
           />
@@ -348,7 +349,7 @@ function OpeningHeadline({ progress }: { progress: MotionValue<number> }) {
         <h1 className="hero-text-glow-strong mx-auto mt-7 max-w-[16ch] md:mx-0">
           <motion.span
             className="text-hero-cinema block text-warm-cream"
-            initial={{ opacity: 0, y: 48, filter: 'blur(8px)' }}
+            initial={false}
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             transition={{ duration: 0.95, delay: 0.28, ease: [0.22, 1, 0.36, 1] }}
           >
@@ -356,7 +357,7 @@ function OpeningHeadline({ progress }: { progress: MotionValue<number> }) {
           </motion.span>
           <motion.span
             className="text-hero-cinema-accent hero-accent-brand mt-1 block"
-            initial={{ opacity: 0, y: 36, filter: 'blur(6px)' }}
+            initial={false}
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             transition={{ duration: 0.95, delay: 0.42, ease: [0.22, 1, 0.36, 1] }}
           >
@@ -364,7 +365,7 @@ function OpeningHeadline({ progress }: { progress: MotionValue<number> }) {
           </motion.span>
           <motion.span
             className="text-hero-cinema block text-warm-cream"
-            initial={{ opacity: 0, y: 48, filter: 'blur(8px)' }}
+            initial={false}
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             transition={{ duration: 0.95, delay: 0.56, ease: [0.22, 1, 0.36, 1] }}
           >
@@ -374,7 +375,7 @@ function OpeningHeadline({ progress }: { progress: MotionValue<number> }) {
 
         <motion.p
           className="hero-text-glow text-hero-lede mt-6 max-w-lg md:mt-8"
-          initial={{ opacity: 0, y: 24 }}
+          initial={false}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.72, ease: [0.22, 1, 0.36, 1] }}
         >
@@ -384,7 +385,7 @@ function OpeningHeadline({ progress }: { progress: MotionValue<number> }) {
 
         <motion.p
           className="hero-text-glow mt-3 font-display text-[13px] font-semibold tracking-wide text-burnt-sienna"
-          initial={{ opacity: 0 }}
+          initial={false}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.88 }}
         >
@@ -563,14 +564,7 @@ function VideoStage() {
           />
         </motion.div>
 
-        {/* Flash pós-loader — reveal cinematográfico */}
-        <motion.div
-          className="pointer-events-none absolute inset-0 z-[4] bg-studio-black"
-          initial={{ opacity: 1 }}
-          animate={{ opacity: 0 }}
-          transition={{ duration: 1.1, delay: 0.05, ease: [0.22, 1, 0.36, 1] }}
-          aria-hidden
-        />
+        {/* Flash pós-loader — removido: bloqueava ecrã em telemóvel se Motion falhar */}
 
         <motion.div
           className="pointer-events-none absolute inset-0 z-[2] bg-gradient-to-r from-studio-black/95 via-studio-black/55 to-studio-black/15"
@@ -620,6 +614,54 @@ function VideoStage() {
   )
 }
 
+function MobileHero() {
+  return (
+    <section
+      id="inicio"
+      className="relative min-h-[100vh] min-h-[100svh] overflow-hidden bg-studio-black"
+    >
+      <div className="absolute inset-0">
+        <video
+          src={VIDEO_SRC}
+          muted
+          playsInline
+          autoPlay
+          loop
+          preload="auto"
+          {...LEGACY_VIDEO_ATTRS}
+          className="h-full w-full object-cover object-[center_42%]"
+        />
+        <div
+          className="absolute inset-0 bg-gradient-to-t from-studio-black via-studio-black/55 to-studio-black/25"
+          aria-hidden
+        />
+      </div>
+
+      <div className="relative z-10 flex min-h-[100vh] min-h-[100svh] flex-col justify-end section-pad pb-10 pt-[5.5rem]">
+        <p className="text-kicker-cream">Limpeza profissional de estofos</p>
+        <h1 className="hero-text-glow-strong mt-6">
+          <span className="text-hero-cinema block text-warm-cream">Estofos</span>
+          <span className="text-hero-cinema-accent hero-accent-brand mt-1 block">limpos como</span>
+          <span className="text-hero-cinema block text-warm-cream">novos.</span>
+        </h1>
+        <p className="hero-text-glow text-hero-lede mt-5 max-w-lg">
+          Higienizamos e impermeabilizamos sofás, tapetes, colchões e cortinas — em
+          Famalicão e arredores.
+        </p>
+        <p className="hero-text-glow mt-3 font-display text-[13px] font-semibold tracking-wide text-burnt-sienna">
+          Orçamento grátis · Resposta em 24h
+        </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <GhostPill href={whatsappUrl('Olá Estofmania! Quero orçamento grátis.')} accent>
+            Pedir orçamento
+          </GhostPill>
+          <GhostPill href="/#servicos">Ver serviços</GhostPill>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 function StaticHero() {
   return (
     <section
@@ -656,5 +698,6 @@ function StaticHero() {
 export function VideoScrollHero() {
   const reduced = useReducedMotion()
   if (reduced) return <StaticHero />
+  if (isTouchDevice()) return <MobileHero />
   return <VideoStage />
 }

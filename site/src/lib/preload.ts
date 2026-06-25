@@ -17,8 +17,8 @@ const PHASE_LABELS: Record<PreloadPhase, string> = {
 }
 
 const DESKTOP_MAX_WAIT_MS = 45_000
-const MOBILE_MAX_WAIT_MS = 12_000
-const MOBILE_LOAD_EVENT_MS = 6_000
+const MOBILE_MAX_WAIT_MS = 5_000
+const MOBILE_LOAD_EVENT_MS = 2_500
 const DESKTOP_LOAD_EVENT_MS = 15_000
 
 function preloadImage(src: string): Promise<void> {

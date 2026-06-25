@@ -17,7 +17,7 @@ import { SectionLabel } from '../ui/ArchiveRow'
 const EASE = [0.22, 1, 0.36, 1] as const
 const CARD_SELECTOR = '[data-service-card]'
 /** vh per card — scroll “consumido” antes de libertar a página */
-const VH_PER_CARD = isTouchDevice() ? 52 : 78
+const VH_PER_CARD = 78
 const SCROLL_HEIGHT = `${services.length * VH_PER_CARD}vh`
 
 function easeProgress(p: number) {
@@ -544,6 +544,6 @@ function ServicesStatic() {
 
 export function Services() {
   const reduced = useReducedMotion()
-  if (reduced) return <ServicesStatic />
+  if (reduced || isTouchDevice()) return <ServicesStatic />
   return <ServicesScrollStage />
 }
