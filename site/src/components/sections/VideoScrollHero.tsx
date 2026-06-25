@@ -11,6 +11,7 @@ import { company } from '../../data/content'
 import {
   isTouchDevice,
   primeVideoForScroll,
+  resetVideoScrubState,
   seekVideoToProgress,
 } from '../../lib/heroVideo'
 import { adoptHeroVideoElement, getHeroVideoSrc, releaseHeroVideoElement } from '../../lib/preload'
@@ -18,7 +19,7 @@ import { whatsappUrl } from '../../lib/utils'
 
 /** Matches the studio cyclorama in the source MP4 — do not colorkey (sofa is same grey). */
 const VIDEO_STUDIO = '#A8A8A8'
-const SCROLL_HEIGHT = '1400vh'
+const SCROLL_HEIGHT = '1400svh'
 
 type Range = readonly [number, number]
 type BeatSide = 'left' | 'right'
@@ -118,7 +119,7 @@ function sceneOpacity(progress: MotionValue<number>, range: Range) {
 }
 
 function sceneVisibility(opacity: MotionValue<number>) {
-  return useTransform(opacity, (v) => (v > 0.015 ? 'visible' : 'hidden'))
+  return useTransform(opacity, (v) => (v > 0.01 ? 'visible' : 'hidden'))
 }
 
 function TitleLine({
@@ -170,8 +171,8 @@ function TitleLine({
   )
   const clipPct = useTransform(
     progress,
-    [lineStart, lineStart + lineEnter],
-    anim === 'clip' ? [100, 0] : [0, 0],
+    [lineStart, lineStart + lineEnter, lineEnd - lineEnter, lineEnd],
+    anim === 'clip' ? [100, 0, 0, 100] : [0, 0, 0, 0],
   )
   const clipPath = useTransform(clipPct, (v) =>
     side === 'right'
@@ -523,7 +524,7 @@ function VideoStage() {
       if (primedRef.current) return
       await primeVideoForScroll(video)
       primedRef.current = true
-      seekVideoToProgress(video, scrollYProgress.get())
+      seekVideoToProgress(video, progress.get())
     }
 
     void unlock()
@@ -543,10 +544,11 @@ function VideoStage() {
       } else {
         releaseHeroVideoElement(video)
       }
+      resetVideoScrubState(video)
     }
-  }, [scrollYProgress, videoSrc])
+  }, [progress, videoSrc])
 
-  useMotionValueEvent(scrollYProgress, 'change', (p) => {
+  useMotionValueEvent(progress, 'change', (p) => {
     const video = videoRef.current
     if (!video) return
     seekVideoToProgress(video, p)
