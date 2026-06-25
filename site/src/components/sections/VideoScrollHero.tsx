@@ -6,8 +6,9 @@ import {
   useTransform,
   type MotionValue,
 } from 'motion/react'
-import { type ReactNode, type VideoHTMLAttributes, useRef } from 'react'
+import { type ReactNode, type VideoHTMLAttributes, useEffect, useRef } from 'react'
 import { company } from '../../data/content'
+import { isTouchDevice } from '../../lib/device'
 import { HERO_VIDEO_SRC } from '../../lib/assets'
 import { whatsappUrl } from '../../lib/utils'
 
@@ -15,7 +16,7 @@ const LEGACY_VIDEO_ATTRS = { 'webkit-playsinline': '' } as VideoHTMLAttributes<H
 const VIDEO_SRC = HERO_VIDEO_SRC
 /** Matches the studio cyclorama in the source MP4 — do not colorkey (sofa is same grey). */
 const VIDEO_STUDIO = '#A8A8A8'
-const SCROLL_HEIGHT = '1400vh'
+const SCROLL_HEIGHT = isTouchDevice() ? '920vh' : '1400vh'
 
 type Range = readonly [number, number]
 type BeatSide = 'left' | 'right'
@@ -473,6 +474,7 @@ function GhostPill({
 function VideoStage() {
   const containerRef = useRef<HTMLElement>(null)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const videoReadyRef = useRef(false)
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end end'],
@@ -488,12 +490,50 @@ function VideoStage() {
   const ctaOpacity = useTransform(beatProgress, [0, 0.78, 0.94], [1, 1, 0])
   const textVeil = useTransform(progress, [0, 0.25, 0.55], [0.72, 0.55, 0.65])
 
+  useEffect(() => {
+    const video = videoRef.current
+    if (!video) return
+
+    let cancelled = false
+
+    const primeVideo = async () => {
+      if (cancelled || videoReadyRef.current) return
+      try {
+        video.muted = true
+        await video.play()
+        video.pause()
+        video.currentTime = 0.001
+      } catch {
+        /* iOS low power / autoplay policy — seek ainda pode funcionar após metadata */
+      }
+      if (!cancelled) videoReadyRef.current = true
+    }
+
+    const onMeta = () => void primeVideo()
+    video.addEventListener('loadedmetadata', onMeta)
+    video.addEventListener('canplay', onMeta)
+    if (video.readyState >= 1) void primeVideo()
+
+    return () => {
+      cancelled = true
+      video.removeEventListener('loadedmetadata', onMeta)
+      video.removeEventListener('canplay', onMeta)
+    }
+  }, [])
+
   useMotionValueEvent(scrollYProgress, 'change', (p) => {
     const video = videoRef.current
     if (!video?.duration || Number.isNaN(video.duration)) return
     const target = p * video.duration
-    if (Math.abs(video.currentTime - target) > 0.035) {
-      video.currentTime = target
+    if (Math.abs(video.currentTime - target) <= 0.05) return
+    try {
+      if (typeof video.fastSeek === 'function') {
+        video.fastSeek(target)
+      } else {
+        video.currentTime = target
+      }
+    } catch {
+      /* iOS pode rejeitar seek enquanto bufferiza */
     }
   })
 
@@ -505,7 +545,7 @@ function VideoStage() {
       style={{ height: SCROLL_HEIGHT }}
     >
       <div
-        className="sticky top-0 h-screen overflow-hidden"
+        className="sticky top-0 viewport-lock overflow-hidden touch-pan-y"
         style={{ backgroundColor: VIDEO_STUDIO }}
       >
         <motion.div

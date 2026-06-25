@@ -38,13 +38,14 @@
   html {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
+    width: 100%;
   }
 
   body {
     @apply bg-canvas font-display font-normal text-ink antialiased;
-    overflow-x: hidden;
+    width: 100%;
     min-height: 100vh;
+    min-height: 100svh;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
   }
 
@@ -60,6 +61,19 @@
 }
 
 @layer utilities {
+  /** Altura ecrã — vh para antigos, svh para telemóvel moderno; sticky-safe (sem overflow no body). */
+  .viewport-lock {
+    height: 100vh;
+    height: 100svh;
+    min-height: -webkit-fill-available;
+  }
+
+  .viewport-lock-min {
+    min-height: 100vh;
+    min-height: 100svh;
+    min-height: -webkit-fill-available;
+  }
+
   .section-pad {
     padding-inline: clamp(1rem, 4.5vw, 2rem);
   }

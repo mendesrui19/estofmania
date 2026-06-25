@@ -10,13 +10,14 @@ import {
 } from 'motion/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { services } from '../../data/content'
+import { isTouchDevice } from '../../lib/device'
 import { whatsappUrl } from '../../lib/utils'
 import { SectionLabel } from '../ui/ArchiveRow'
 
 const EASE = [0.22, 1, 0.36, 1] as const
 const CARD_SELECTOR = '[data-service-card]'
 /** vh per card — scroll “consumido” antes de libertar a página */
-const VH_PER_CARD = 78
+const VH_PER_CARD = isTouchDevice() ? 52 : 78
 const SCROLL_HEIGHT = `${services.length * VH_PER_CARD}vh`
 
 function easeProgress(p: number) {
@@ -387,7 +388,7 @@ function ServicesScrollStage() {
       style={{ height: SCROLL_HEIGHT }}
       aria-label="Serviços"
     >
-      <div className="sticky top-0 flex min-h-screen flex-col justify-center bg-canvas py-16 md:py-20">
+      <div className="sticky top-0 viewport-lock-min flex flex-col justify-center bg-canvas py-16 md:py-20">
         <div className="section-pad mx-auto w-full max-w-6xl">
           <SectionLabel>Arquivo · Serviços</SectionLabel>
           <h2 className="text-heading">Tudo o que cuidamos.</h2>
