@@ -13,7 +13,7 @@ import { ScrollProgress } from './components/ui/ScrollProgress'
 
 export default function App() {
   return (
-    <div className="overflow-x-clip">
+    <div className="overflow-x-hidden">
       <ScrollProgress />
       <CursorGlow />
       <Header />

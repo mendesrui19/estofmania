@@ -74,7 +74,7 @@ export function Benefits() {
           {benefits.map((b, i) => (
             <StaggerItem key={b}>
               <motion.div
-                className="group flex h-full min-h-[4.5rem] items-start gap-3 rounded-xl border border-border/80 bg-white/80 px-4 py-3.5 backdrop-blur-sm transition-[border-color,box-shadow] duration-300 hover:border-brand/50 hover:shadow-[0_12px_32px_-12px_rgba(128,152,112,0.25)] lg:px-5 lg:py-4"
+                className="group flex h-full min-h-[4.5rem] items-start gap-3 rounded-xl border border-border/80 bg-white/90 px-4 py-3.5 transition-[border-color,box-shadow] duration-300 hover:border-brand/50 hover:shadow-[0_12px_32px_-12px_rgba(128,152,112,0.25)] lg:px-5 lg:py-4"
                 whileHover={{ y: -3 }}
                 transition={{ duration: 0.25 }}
               >

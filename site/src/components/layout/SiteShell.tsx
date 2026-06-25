@@ -62,7 +62,7 @@ export function SiteShell({ children, includeVideo = true }: SiteShellProps) {
       )}
       {phase === 'ready' && (
         <motion.div
-          className="min-w-0 overflow-x-clip"
+          className="min-w-0 overflow-x-hidden"
           initial={reduced ? false : { opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}

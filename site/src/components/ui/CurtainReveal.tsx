@@ -38,7 +38,7 @@ export function CurtainReveal({ image, label, title, caption }: CurtainRevealPro
   if (reduced) {
     return (
       <section className="relative bg-canvas">
-        <div className="relative h-[70svh] overflow-hidden">
+        <div className="relative h-[70vh] overflow-hidden">
           <img src={image} alt={title} className="h-full w-full bg-brand-light object-contain p-4" />
           <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/20 to-transparent" />
           <div className="section-pad absolute bottom-0 left-0 pb-10">
@@ -52,7 +52,7 @@ export function CurtainReveal({ image, label, title, caption }: CurtainRevealPro
 
   return (
     <section ref={ref} className="relative h-[220vh] bg-canvas">
-      <div className="sticky top-0 h-[100svh] overflow-hidden">
+      <div className="sticky top-0 h-screen overflow-hidden">
         {/* Revealed stage */}
         <motion.img
           src={image}
