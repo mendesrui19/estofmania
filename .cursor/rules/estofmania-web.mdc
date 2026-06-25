@@ -1,0 +1,13 @@
+---
+description: Estofmania site — stack, design system, and production standards
+alwaysApply: true
+---
+
+# Estofmania
+
+- Marketing site for an upholstery / estofos business (pt-PT).
+- App lives in `site/` when scaffolded: Vite + React + TS + Tailwind v4 + `motion` + lucide-react.
+- **Always** follow `design-system/estofmania/MASTER.md` for colors, fonts, and layout pattern.
+- Use skills: `ui-ux-pro-max`, `estofmania-web`, `web-production`.
+- Copy in European Portuguese. No emoji icons — SVG only.
+- Before “done”: responsive check, a11y, SEO meta, browser preview via MCP.

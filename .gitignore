@@ -1,0 +1,22 @@
+# Dependencies & build
+site/node_modules/
+site/dist/
+
+# Python tooling
+.tools/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS & editors
+.DS_Store
+*.local
+.env
+.env.*
+
+# Logs
+*.log
+
+# Raw social downloads (large; not needed for site deploy)
+assets/social/

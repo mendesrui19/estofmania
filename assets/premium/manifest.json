@@ -1,0 +1,110 @@
+{
+  "count": 11,
+  "criteria": {
+    "min_width": 1080,
+    "min_long_edge": 1080,
+    "min_kb": 120,
+    "min_sharpness": 55.0
+  },
+  "images": [
+    {
+      "file": "assets/premium/01_estofos.jpg",
+      "category": "estofos",
+      "width": 1440,
+      "height": 1800,
+      "sharpness": 6695.5,
+      "source": "instagram/posts/instagram/estofmania/3627182238644851223_3627182226221544367.jpg",
+      "recommended_use": "hero"
+    },
+    {
+      "file": "assets/premium/02_estofos.jpg",
+      "category": "estofos",
+      "width": 1440,
+      "height": 1440,
+      "sharpness": 4102.5,
+      "source": "instagram/posts/instagram/estofmania/3611800446239395383_3611800439184610663.jpg",
+      "recommended_use": "hero"
+    },
+    {
+      "file": "assets/premium/03_estofos.jpg",
+      "category": "estofos",
+      "width": 1438,
+      "height": 1017,
+      "sharpness": 4043.3,
+      "source": "instagram/posts/instagram/estofmania/3479322702864912486.jpg",
+      "recommended_use": "hero"
+    },
+    {
+      "file": "assets/premium/04_estofos.jpg",
+      "category": "estofos",
+      "width": 1440,
+      "height": 1440,
+      "sharpness": 3623.6,
+      "source": "instagram/posts/instagram/estofmania/3611800446239395383_3611800439419524802.jpg",
+      "recommended_use": "hero"
+    },
+    {
+      "file": "assets/premium/05_estofos.jpg",
+      "category": "estofos",
+      "width": 1440,
+      "height": 1440,
+      "sharpness": 3331.7,
+      "source": "instagram/posts/instagram/estofmania/3611800446239395383_3611800439318656601.jpg",
+      "recommended_use": "hero"
+    },
+    {
+      "file": "assets/premium/06_estofos.jpg",
+      "category": "estofos",
+      "width": 1440,
+      "height": 1440,
+      "sharpness": 2479.5,
+      "source": "instagram/posts/instagram/estofmania/3611800446239395383_3611800439243342219.jpg",
+      "recommended_use": "hero"
+    },
+    {
+      "file": "assets/premium/07_geral.jpg",
+      "category": "geral",
+      "width": 1080,
+      "height": 1920,
+      "sharpness": 1569.2,
+      "source": "instagram/posts/DVJtD0HjcnT.jpg",
+      "recommended_use": "gallery"
+    },
+    {
+      "file": "assets/premium/08_geral.jpg",
+      "category": "geral",
+      "width": 1080,
+      "height": 1920,
+      "sharpness": 779.7,
+      "source": "instagram/posts/DUDNwOjCRKL.jpg",
+      "recommended_use": "gallery"
+    },
+    {
+      "file": "assets/premium/09_geral.jpg",
+      "category": "geral",
+      "width": 1080,
+      "height": 1920,
+      "sharpness": 671.1,
+      "source": "instagram/posts/DTbISxWCELx.jpg",
+      "recommended_use": "gallery"
+    },
+    {
+      "file": "assets/premium/10_geral.jpg",
+      "category": "geral",
+      "width": 1080,
+      "height": 1350,
+      "sharpness": 553.3,
+      "source": "instagram/posts/DTQoMp3j-ej.jpg",
+      "recommended_use": "gallery"
+    },
+    {
+      "file": "assets/premium/11_geral.jpg",
+      "category": "geral",
+      "width": 1080,
+      "height": 1350,
+      "sharpness": 540.3,
+      "source": "instagram/posts/DUi-QEXmEfG.jpg",
+      "recommended_use": "gallery"
+    }
+  ]
+}
